@@ -1,0 +1,148 @@
+import random
+import time
+deck = {}
+keys = []
+
+def make_deck():
+
+  cards = ['A','2','3','4','5','6','7','8','9','10','J','Q','K']
+
+  for x in range (13):
+    keys.append(cards[x]+'c')
+    keys.append(cards[x]+'s')
+    keys.append(cards[x]+'h')
+    keys.append(cards[x]+'d')
+
+  shuffled_deck = random.shuffle(keys)
+
+  for x in keys:
+    if x[0] == 'A':
+      value = 11
+    elif x[0] == 'J' or x[0] == 'Q' or x[0] == 'K':
+      value = 10
+    else:
+      value = int(x[0])
+    deck[x] = value
+  return(deck)
+
+make_deck()
+
+def value_of_cards(whos_cards):
+  value_cards = 0
+  for card in whos_cards:
+    value_cards += deck[card]
+  return value_cards
+
+key_list = list(deck)
+your_cards = []
+dealers_cards = []
+your_hands = []
+
+def deal():
+  your_cards.append(key_list[0])
+  your_cards.append(key_list[2])
+  dealers_cards.append(key_list[1])
+  dealers_cards.append(key_list[3])
+  your_hands.append(your_cards)
+  print(f'Your hand: {your_cards[0]} {your_cards[1]}\nDealers hand: {dealers_cards[0]} __')
+
+money = 100000
+rounds_played = 0
+
+while True:
+  have_enough = False
+  if rounds_played > 0:
+    x = input('Would you like to play another round (yes/no)?\n').lower()
+    if x == 'no':
+      break
+  else:
+    print('Welcome to single deck blackjack. Good luck.')
+
+  while not have_enough:
+    bet = int(input('\nNew Round, please place bet:\n'))
+    if bet > money:
+      print('You do not have that much')
+      pass
+    else:
+      money -= bet
+      have_enough = True
+
+  your_cards = []
+  dealers_cards = []
+  make_deck()
+  deal()
+  count = 4
+  print(deck)
+
+
+  round_still_going = True
+  while round_still_going:
+
+    you_still_going = True
+    while you_still_going:
+
+      HS = input('Hit, stand, double, or split?\n\n')
+      val = value_of_cards(your_cards)
+
+      if HS.lower() == 'hit':
+        your_cards.append(key_list[count])
+        count += 1
+        val = value_of_cards(your_cards)
+
+      elif HS.lower() == 'double':
+        your_cards.append(key_list[count])
+        count += 1
+        money -= bet
+        bet += bet
+
+      elif HS.lower() == 'split':
+        if your_hands[0][0] == your_hands[1][0]:
+          money -= bet
+          bet *= 2
+
+      elif HS.lower() == 'stand':
+        you_still_going = False
+        dval = value_of_cards(dealers_cards)
+
+        time.sleep(2)
+        print(f'Dealers hand: {dealers_cards}')
+
+        while True:
+          if dval < 17:
+            dealers_cards.append(key_list[count])
+            count += 1
+            dval = value_of_cards(dealers_cards)
+            time.sleep(2)
+            print(f'Dealers hand: {dealers_cards}')
+          elif dval < 22:
+            round_still_going = False
+            break
+          else:
+            print('Dealer bust, you win')
+            round_still_going = False
+            break
+        
+        if val > dval:
+          print('You won!')
+          money += 2 * bet
+          print(f'Money: {money}')
+          round_still_going = False
+        elif val is dval:
+          print('Push')
+          money += bet
+          print(f'Money: {money}')
+          round_still_going = False
+        else:
+          print('You lost')
+          print(f'Money: {money}')
+          round_still_going = False
+      
+      print(f'Your hand: {your_cards}\nDealers hand: {dealers_cards}')
+
+      if val > 21:
+        print(f'You lost\nMoney: {money}')
+        you_still_going = False
+        round_still_going = False
+
+  rounds_played += 1
+  print(f'Rounds played: {rounds_played}')
